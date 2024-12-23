@@ -6,32 +6,42 @@ This repository serves as a comprehensive developer guide for Google's Gemini Mu
 
 ## Repository Structure
 
+The guide is divided into chapters that progressively introduce different aspects of the Gemini Multimodal Live API. **Chapters 1 and 2 utilize the Python SDK (`google-genai`) to provide an initial understanding of interacting with the API. Chapters 3 and 4 then shift to using JavaScript and the low-level WebSocket API directly in the browser.**
+
+**Why the Switch to JavaScript and WebSockets?**
+
+While the Python SDK offers a convenient way to interact with the Gemini API, this guide deliberately transitions to JavaScript and WebSockets to facilitate the development of **real-time, browser-based applications**. WebSockets are the native browser technology for real-time, bidirectional communication, making them essential for interactive experiences like live audio chat and text-to-speech. Python is just not ideal for browser front-ends: While we can technically use Python for web development (e.g., with frameworks like Flask or Django), it's not the natural choice for front-end, browser-based interactions, especially real-time audio processing within the browser itself.
+
+Using JavaScript allows us to seamlessly integrate these features directly into the browser environment. Furthermore, understanding the low-level WebSocket interaction provides a **deeper understanding of the API's communication protocol** and offers **greater flexibility and control** for specialized use cases or integrations not fully supported by the SDK.
+
+## Detailed Repository Structure
+
 The repository is organized into the following chapters:
 
 *   **`chapter_01`**: **Introduction to the Google Gemini SDK**
     *   This chapter provides a gentle introduction to interacting with the Gemini model using the official Google Gemini SDK (`google-genai` Python package).
     *   It demonstrates simple text and audio interactions using the SDK's high-level abstractions.
-    *   You'll find a Jupyter Notebook (`sdk-intro.ipynb`) that guides you through the process of setting up the SDK, sending text prompts, receiving text responses, and generating audio output.
+    *   You'll find a Jupyter Notebook ([`sdk-intro.ipynb`](chapter_01/sdk-intro.ipynb)) that guides you through the process of setting up the SDK, sending text prompts, receiving text responses, and generating audio output.
     *   This chapter is ideal for developers new to the Gemini API or those who prefer the convenience of an SDK.
 
 *   **`chapter_02`**: **Live Audio Chat with Gemini**
     *   This chapter presents a more advanced application: a real-time, two-way audio chat application built using the Gemini Multimodal Live API.
     *   The Python script (`audio-to-audio.py`) demonstrates how to capture audio from the user's microphone, send it to the API in chunks, receive the model's audio response, and play it back in real time.
     *   This chapter delves into concepts like asynchronous programming, audio chunking, Voice Activity Detection (VAD), and managing the flow of a live conversation.
-    *   The `README.md` file accompanying the script provides a comprehensive explanation of these concepts and how they are implemented.
+    *   The [`README.md`](chapter_02/README.md) file accompanying the script provides a comprehensive explanation of these concepts and how they are implemented.
 
 *   **`chapter_03`**: **Low-Level WebSocket Interaction - Single Exchange Example**
     *   This chapter dives deeper into the underlying communication mechanism by demonstrating how to interact with the Gemini API using raw WebSockets, without relying on any SDK.
-    *   It provides a simple HTML file (`index.html`) that establishes a WebSocket connection, sends a single hardcoded text message to the Gemini model, and displays the model's text response.
+    *   It provides a simple HTML file ([`index.html`](chapter_03/index.html)) that establishes a WebSocket connection, sends a single hardcoded text message to the Gemini model, and displays the model's text response.
     *   This chapter is particularly useful for developers who need a more granular understanding of the API's communication protocol or those who need to integrate the API into environments where an SDK might not be available or suitable. It showcases the mandatory setup message exchange, which is crucial for establishing a session with the API.
-    *   The concepts of this chapter are explained in detail in the `README.md` file.
+    *   The concepts of this chapter are explained in detail in the [`README.md`](chapter_03/README.md) file.
     
 *   **`chapter_04`**: **Text-to-Speech with WebSockets**
     *   This chapter demonstrates a practical application of the Gemini API's text-to-speech capabilities, again using a low-level WebSocket connection for communication.
-    *   It provides an HTML file (`index.html`) that allows you to enter text, send it to the Gemini model, and receive an audio response that is played directly in your browser.
+    *   It provides an HTML file ([`index.html`](chapter_04/index.html)) that allows you to enter text, send it to the Gemini model, and receive an audio response that is played directly in your browser.
     *   This example showcases how to handle audio output from the API, decode it, and use the browser's `AudioContext` API to manage audio playback. It includes a queueing mechanism to ensure audio chunks are played sequentially.
     *   You'll learn about concepts like base64 audio decoding, PCM audio format conversion, and the intricacies of real-time audio playback in a web browser.
-    *   The accompanying `README.md` file within the `chapter_04` directory provides a detailed explanation of the code and the underlying principles.
+    *   The accompanying [`README.md`](chapter_04/README.md) file within the `chapter_04` directory provides a detailed explanation of the code and the underlying principles.
 
 
 
@@ -67,4 +77,4 @@ This repository is currently not accepting contributions, as it's meant to be a 
 
 ## License
 
-This project is licensed under the MIT License - see the `LICENSE` and `NOTICE` files for details.
+This project is licensed under the MIT License - see the [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE) files for details.
