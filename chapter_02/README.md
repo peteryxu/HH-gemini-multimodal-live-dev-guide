@@ -147,3 +147,7 @@ The `audio_loop` function orchestrates the entire process.
 
 The `if __name__ == "__main__":` block ensures that the `audio_loop` function is executed only when the script is run directly. The `asyncio.run` function starts the asynchronous event loop and runs the `audio_loop` function, enabling the real-time audio chat.
 
+## Limitations
+
+The current implementation does not support user interruption of the model's speech.
+
