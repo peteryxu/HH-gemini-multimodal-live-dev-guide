@@ -25,6 +25,13 @@ The repository is organized into the following chapters:
     *   It provides a simple HTML file (`index.html`) that establishes a WebSocket connection, sends a single hardcoded text message to the Gemini model, and displays the model's text response.
     *   This chapter is particularly useful for developers who need a more granular understanding of the API's communication protocol or those who need to integrate the API into environments where an SDK might not be available or suitable. It showcases the mandatory setup message exchange, which is crucial for establishing a session with the API.
     *   The concepts of this chapter are explained in detail in the `README.md` file.
+    
+*   **`chapter_04`**: **Text-to-Speech with WebSockets**
+    *   This chapter demonstrates a practical application of the Gemini API's text-to-speech capabilities, again using a low-level WebSocket connection for communication.
+    *   It provides an HTML file (`index.html`) that allows you to enter text, send it to the Gemini model, and receive an audio response that is played directly in your browser.
+    *   This example showcases how to handle audio output from the API, decode it, and use the browser's `AudioContext` API to manage audio playback. It includes a queueing mechanism to ensure audio chunks are played sequentially.
+    *   You'll learn about concepts like base64 audio decoding, PCM audio format conversion, and the intricacies of real-time audio playback in a web browser.
+    *   The accompanying `README.md` file within the `chapter_04` directory provides a detailed explanation of the code and the underlying principles.
 
 
 
@@ -36,7 +43,8 @@ The repository is organized into the following chapters:
 2. **Start with Chapter 1:** If you're new to the Gemini API, it's recommended to begin with `chapter_01`. The Jupyter Notebook will guide you through the basics of using the SDK.
 3. **Dive into Chapter 2:** `chapter_02` presents a more complex application. You can run the `audio_chat.py` script after installing the required dependencies (listed in the script) and setting your API key as an environment variable or directly in the code (not recommended for production).
 4. **Explore Chapter 3:** Move on to `chapter_03` to understand the underlying WebSocket communication. Open the `index.html` file in your browser and examine the JavaScript code along with the accompanying `README.md`.
-5. **Experiment:** Feel free to modify the code examples, experiment with different parameters (e.g., `CHUNK_SIZE`, `SEND_SAMPLE_RATE`), and explore the API documentation to deepen your understanding.
+5. **Experiment with Chapter 4:** Open the `index.html` file from `chapter_04` in your browser. Follow the instructions in the chapter's `README.md` to input text and hear the generated audio.
+6. **Experiment:** Feel free to modify the code examples, experiment with different parameters (e.g., `CHUNK_SIZE`, `SEND_SAMPLE_RATE`), and explore the API documentation to deepen your understanding.
 
 ## Key Concepts
 
@@ -50,6 +58,8 @@ This guide covers several important concepts related to the Gemini Multimodal Li
 *   **API Message Formats:** Understanding the structure of messages exchanged with the API (e.g., `BidiGenerateContentSetup`, `BidiGenerateContentClientContent`, `BidiGenerateContentServerContent`).
 *   **Session Management:** Properly initiating and configuring a session with the API.
 *   **Turn-Taking:** Managing the flow of conversation between the user and the model.
+*   **Audio Encoding and Decoding:** Handling different audio formats and converting between them.
+*   **Browser Audio Playback:** Using the `AudioContext` API for real-time audio playback in the browser.
 
 ## Contributing
 
@@ -57,6 +67,4 @@ This repository is currently not accepting contributions, as it's meant to be a 
 
 ## License
 
-This project is licensed under the MIT License - see the `LICENSE` file for details.
-
-This README provides a clear overview of the repository's contents, structure, and purpose. It guides developers through the different chapters, explains how to use the examples, and highlights the key concepts covered. Remember to replace placeholder comments like "attached a screenshot of how it looks like now" with actual descriptions or instructions relevant to your repository.
+This project is licensed under the MIT License - see the `LICENSE` and `NOTICE` files for details.
