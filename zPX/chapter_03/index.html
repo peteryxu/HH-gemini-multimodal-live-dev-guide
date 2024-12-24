@@ -5,10 +5,11 @@
 </head>
 <body>
   <div id="output"></div>
-
+  <script src="./config.js"></script>
   <script>
     const output = document.getElementById('output');
-    const apiKey = 'paste here';
+    //const apiKey = '<YOUR_API_KEY>';
+    const apiKey = GOOGLE_API_KEY  
 
     const host = 'generativelanguage.googleapis.com';
     const endpoint = `wss://${host}/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${apiKey}`;
