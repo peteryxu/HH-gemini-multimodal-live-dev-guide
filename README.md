@@ -18,25 +18,25 @@ Using JavaScript allows us to seamlessly integrate these features directly into 
 
 The repository is organized into the following chapters:
 
-*   **`[chapter_01](chapter_01)`**: **Introduction to the Google Gemini SDK**
+*   **[`chapter_01`](chapter_01)**: **Introduction to the Google Gemini SDK**
     *   This chapter provides a gentle introduction to interacting with the Gemini model using the official Google Gemini SDK (`google-genai` Python package).
     *   It demonstrates simple text and audio interactions using the SDK's high-level abstractions.
     *   You'll find a Jupyter Notebook ([`sdk-intro.ipynb`](chapter_01/sdk-intro.ipynb)) that guides you through the process of setting up the SDK, sending text prompts, receiving text responses, and generating audio output.
     *   This chapter is ideal for developers new to the Gemini API or those who prefer the convenience of an SDK.
 
-*   **`[chapter_02](chapter_02)`**: **Live Audio Chat with Gemini**
+*   **[`chapter_02`](chapter_02)**: **Live Audio Chat with Gemini**
     *   This chapter presents a more advanced application: a real-time, two-way audio chat application built using the Gemini Multimodal Live API.
     *   The Python script (`audio-to-audio.py`) demonstrates how to capture audio from the user's microphone, send it to the API in chunks, receive the model's audio response, and play it back in real time.
     *   This chapter delves into concepts like asynchronous programming, audio chunking, Voice Activity Detection (VAD), and managing the flow of a live conversation.
     *   The [`README.md`](chapter_02/README.md) file accompanying the script provides a comprehensive explanation of these concepts and how they are implemented.
 
-*   **`[chapter_03](chapter_03)`**: **Low-Level WebSocket Interaction - Single Exchange Example**
+*   **[`chapter_03`](chapter_03)**: **Low-Level WebSocket Interaction - Single Exchange Example**
     *   This chapter dives deeper into the underlying communication mechanism by demonstrating how to interact with the Gemini API using raw WebSockets, without relying on any SDK.
     *   It provides a simple HTML file ([`index.html`](chapter_03/index.html)) that establishes a WebSocket connection, sends a single hardcoded text message to the Gemini model, and displays the model's text response.
     *   This chapter is particularly useful for developers who need a more granular understanding of the API's communication protocol or those who need to integrate the API into environments where an SDK might not be available or suitable. It showcases the mandatory setup message exchange, which is crucial for establishing a session with the API.
     *   The concepts of this chapter are explained in detail in the [`README.md`](chapter_03/README.md) file.
     
-*   **`[chapter_04](chapter_04)`**: **Text-to-Speech with WebSockets**
+*   **[`chapter_04`](chapter_04)**: **Text-to-Speech with WebSockets**
     *   This chapter demonstrates a practical application of the Gemini API's text-to-speech capabilities, again using a low-level WebSocket connection for communication.
     *   It provides an HTML file ([`index.html`](chapter_04/index.html)) that allows you to enter text, send it to the Gemini model, and receive an audio response that is played directly in your browser.
     *   This example showcases how to handle audio output from the API, decode it, and use the browser's `AudioContext` API to manage audio playback. It includes a queueing mechanism to ensure audio chunks are played sequentially.
