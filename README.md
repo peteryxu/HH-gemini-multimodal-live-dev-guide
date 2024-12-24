@@ -77,4 +77,4 @@ This repository is currently not accepting contributions, as it's meant to be a 
 
 ## License
 
-This project is licensed under the MIT License - see the [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE) files for details.
+This project is licensed under the MIT License.
