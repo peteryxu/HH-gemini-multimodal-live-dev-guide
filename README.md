@@ -6,7 +6,7 @@ This repository serves as a comprehensive developer guide for Google's Gemini Mu
 
 ## Repository Structure
 
-The guide is divided into chapters that progressively introduce different aspects of the Gemini Multimodal Live API. **Chapters 1 and 2 utilize the Python SDK (`google-genai`) to provide an initial understanding of interacting with the API. Chapters 3 and 4 then shift to using JavaScript and the low-level WebSocket API directly in the browser.**
+The guide is divided into chapters that progressively introduce different aspects of the Gemini Multimodal Live API. **Chapters 1 and 2 utilize the Python SDK (`google-genai`) to provide an initial understanding of interacting with the API. Chapters 3, 4, and 5 then shift to using JavaScript and the low-level WebSocket API directly in the browser.**
 
 **Why the Switch to JavaScript and WebSockets?**
 
@@ -25,7 +25,7 @@ The repository is organized into the following chapters:
     *   This chapter is ideal for developers new to the Gemini API or those who prefer the convenience of an SDK.
 
 *   **[`chapter_02`](chapter_02)**: **Live Audio Chat with Gemini**
-    *   This chapter presents a more advanced application: a real-time, two-way audio chat application built using the Gemini Multimodal Live API.
+    *   This chapter presents a more advanced application: a real-time, two-way audio chat application built using the Gemini Multimodal Live API and the Python SDK.
     *   The Python script (`audio-to-audio.py`) demonstrates how to capture audio from the user's microphone, send it to the API in chunks, receive the model's audio response, and play it back in real time.
     *   This chapter delves into concepts like asynchronous programming, audio chunking, Voice Activity Detection (VAD), and managing the flow of a live conversation.
     *   The [`README.md`](chapter_02/README.md) file accompanying the script provides a comprehensive explanation of these concepts and how they are implemented.
@@ -35,7 +35,7 @@ The repository is organized into the following chapters:
     *   It provides a simple HTML file ([`index.html`](chapter_03/index.html)) that establishes a WebSocket connection, sends a single hardcoded text message to the Gemini model, and displays the model's text response.
     *   This chapter is particularly useful for developers who need a more granular understanding of the API's communication protocol or those who need to integrate the API into environments where an SDK might not be available or suitable. It showcases the mandatory setup message exchange, which is crucial for establishing a session with the API.
     *   The concepts of this chapter are explained in detail in the [`README.md`](chapter_03/README.md) file.
-    
+
 *   **[`chapter_04`](chapter_04)**: **Text-to-Speech with WebSockets**
     *   This chapter demonstrates a practical application of the Gemini API's text-to-speech capabilities, again using a low-level WebSocket connection for communication.
     *   It provides an HTML file ([`index.html`](chapter_04/index.html)) that allows you to enter text, send it to the Gemini model, and receive an audio response that is played directly in your browser.
@@ -43,7 +43,11 @@ The repository is organized into the following chapters:
     *   You'll learn about concepts like base64 audio decoding, PCM audio format conversion, and the intricacies of real-time audio playback in a web browser.
     *   The accompanying [`README.md`](chapter_04/README.md) file within the `chapter_04` directory provides a detailed explanation of the code and the underlying principles.
 
-
+*   **[`chapter_05`](chapter_05)**: **Live Audio Chat with WebSockets - Advanced Audio Handling**
+    *   This chapter combines the concepts from previous chapters to present a sophisticated real-time audio-to-audio chat application, implemented entirely in the browser using WebSockets and the Web Audio API.
+    *   It features an HTML file (`index.html`) along with JavaScript modules for audio recording (`audio-recorder.js`), audio playback (`audio-streamer.js`), and an AudioWorklet for efficient audio processing (`audio-recording-worklet.js`).
+    *   This chapter tackles advanced topics like live microphone input, bidirectional audio streaming, intricate audio format conversions, precise audio chunking, and robust state management for interruptions and turn-taking.
+    *   The detailed `README.md` file in `chapter_05` provides an in-depth tutorial on building such an application, explaining the design choices, trade-offs, and best practices discovered during development.
 
 ## How to Use This Guide
 
@@ -51,10 +55,11 @@ The repository is organized into the following chapters:
     *   For the first four chapters you'll need a [Google Developer API Key](https://aistudio.google.com/apikey)
     *   Ensure you have Python 3.9+ installed for running the Jupyter Notebook and Python scripts.
 2. **Start with Chapter 1:** If you're new to the Gemini API, it's recommended to begin with `chapter_01`. The Jupyter Notebook will guide you through the basics of using the SDK.
-3. **Dive into Chapter 2:** `chapter_02` presents a more complex application. You can run the `audio_chat.py` script after installing the required dependencies (listed in the script) and setting your API key as an environment variable or directly in the code (not recommended for production).
+3. **Dive into Chapter 2:** `chapter_02` presents a more complex application using the Python SDK. You can run the `audio_chat.py` script after installing the required dependencies (listed in the script) and setting your API key as an environment variable or directly in the code (not recommended for production).
 4. **Explore Chapter 3:** Move on to `chapter_03` to understand the underlying WebSocket communication. Open the `index.html` file in your browser and examine the JavaScript code along with the accompanying `README.md`.
 5. **Experiment with Chapter 4:** Open the `index.html` file from `chapter_04` in your browser. Follow the instructions in the chapter's `README.md` to input text and hear the generated audio.
-6. **Experiment:** Feel free to modify the code examples, experiment with different parameters (e.g., `CHUNK_SIZE`, `SEND_SAMPLE_RATE`), and explore the API documentation to deepen your understanding.
+6. **Tackle Chapter 5:** Open the `index.html` file from `chapter_05` in your browser. Follow the instructions in the chapter's `README.md` to start the audio chat.
+7. **Further Exploration:** Feel free to modify the code examples, experiment with different parameters (e.g., `CHUNK_SIZE`, `SEND_SAMPLE_RATE`), and explore the API documentation to deepen your understanding.
 
 ## Key Concepts
 
