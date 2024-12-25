@@ -38,6 +38,10 @@ This chapter's application consists of the following files:
 *   **`utils.js`:** Provides utility functions like `audioContext` (for creating an `AudioContext`) and `base64ToArrayBuffer` (for decoding base64 audio data).
 *   **`style.css`:** Contains basic CSS styles for the user interface.
 
+## System Architecture
+
+![Audio Client Diagram](../assets/audio-to-audio-websocket.png)
+
 ## Detailed Explanation of Audio Processing
 
 The audio processing pipeline in this application is crucial for real-time performance. Let's break down the components, design choices, and address the specific questions raised:
