@@ -82,4 +82,8 @@ This repository is currently not accepting contributions, as it's meant to be a 
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the Apache License.
+
+## Disclaimer
+
+This is not an officially supported Google project.
