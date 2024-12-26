@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Gemini Audio-to-Audio WebSocket Demo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="input-container">
+    <button id="micButton" onclick="toggleMicrophone()" disabled>Start Mic</button>
+    <button id="webcamButton" onclick="toggleWebcam()" class="action-button">
+      <span class="material-symbols-outlined">videocam</span>
+    </button>
+    <button id="screenButton" onclick="toggleScreen()" class="action-button">
+      <span class="material-symbols-outlined">present_to_all</span>
+    </button>
+  </div>
+  <div class="controls">
+    <button id="micButton" onclick="toggleMicrophone()" disabled>
+      <span class="material-symbols-outlined">play_arrow</span>
+    </button>
+    <button id="webcamButton" onclick="toggleWebcam()" class="action-button">
+      <span class="material-symbols-outlined">videocam</span>
+    </button>
+  </div>
+  <div class="video-container">
+    <video id="videoPreview" autoplay playsinline class="hidden"></video>
+  </div>
+  <div id="output"></div>
+
+  <!-- Load EventEmitter3 first -->
+  <script src="https://cdn.jsdelivr.net/npm/eventemitter3@5.0.1/dist/eventemitter3.umd.min.js"></script>
+
+  <!-- Then load our module code -->
+  <script type="module">
+    import { AudioRecorder } from './audio-recorder.js';
+    import { AudioStreamer } from './audio-streamer.js';
+    import { MediaHandler } from './media-handler.js';
+    import { getWeather } from './weather-api.js';
+
+    const output = document.getElementById('output');
+    const apiKey = '<YOUR_API_KEY>'; // Replace with your actual API key
+    const host = 'generativelanguage.googleapis.com';
+    const endpoint = `wss://${host}/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${apiKey}`;
+
+    const ws = new WebSocket(endpoint);
+    let audioContext;
+    let audioStreamer;
+    let audioRecorder;
+    let isRecording = false;
+    let initialized = false;
+    let isInterrupted = false;
+    let mediaHandler;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      mediaHandler = new MediaHandler();
+      mediaHandler.initialize(document.getElementById('videoPreview'));
+    });
+
+    // Initialize audio when sending the first message
+    async function ensureAudioInitialized() {
+      if (!initialized) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
+        audioStreamer = new AudioStreamer(audioContext);
+        await audioContext.resume();
+        initialized = true;
+        console.log('Audio context initialized:', audioContext.state);
+      }
+    }
+
+    async function playAudioChunk(base64AudioChunk) {
+      try {
+        await ensureAudioInitialized();
+        const arrayBuffer = base64ToArrayBuffer(base64AudioChunk);
+        const uint8Array = new Uint8Array(arrayBuffer);
+        audioStreamer.addPCM16(uint8Array);
+        audioStreamer.resume();
+      } catch (error) {
+        console.error('Error queuing audio chunk:', error);
+      }
+    }
+
+    async function startRecording() {
+      try {
+        await ensureAudioInitialized();
+
+        // Reset state when starting new recording
+        isInterrupted = false;
+        audioStreamer.stop();  // Clean up any previous audio state
+
+        audioRecorder = new AudioRecorder();
+        await audioRecorder.start();
+
+        audioRecorder.on('data', (base64Data) => {
+          sendAudioChunk(base64Data);
+        });
+
+        logMessage('Recording started...');
+        isRecording = true;
+        document.getElementById('micButton').textContent = 'Stop Mic';
+      } catch (error) {
+        console.error('Error starting recording:', error);
+        logMessage('Error starting recording: ' + error.message);
+      }
+    }
+
+    function stopRecording() {
+      if (audioRecorder) {
+        audioRecorder.stop();
+        audioRecorder.off('data');
+        logMessage('Recording stopped.');
+        isRecording = false;
+        document.getElementById('micButton').textContent = 'Start Mic';
+        
+        // Stop video streams when stopping recording
+        mediaHandler.stopAll();
+        document.getElementById('webcamButton').innerHTML = 
+          '<span class="material-symbols-outlined">videocam</span>';
+        document.getElementById('screenButton').innerHTML = 
+          '<span class="material-symbols-outlined">present_to_all</span>';
+        
+        sendEndMessage();
+      }
+    }
+
+    function sendAudioChunk(base64Audio) {
+      const message = {
+        realtime_input: {
+          media_chunks: [{
+            mime_type: "audio/pcm",
+            data: base64Audio
+          }]
+        }
+      };
+      console.log("Sending audio message: ", message);
+      ws.send(JSON.stringify(message));
+    }
+
+    function sendEndMessage() {
+      const message = {
+        client_content: {
+          turns: [{
+            role: "user",
+            parts: []
+          }],
+          turn_complete: true
+        }
+      };
+      ws.send(JSON.stringify(message));
+    }
+
+    function sendContinueSignal() {
+      const message = {
+        client_content: {
+          turns: [{
+            role: "user",
+            parts: []
+          }],
+          turn_complete: false
+        }
+      };
+      ws.send(JSON.stringify(message));
+    }
+
+    // Make toggleMicrophone available globally
+    window.toggleMicrophone = function() {
+      if (isRecording) {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    };
+
+    ws.onopen = () => {
+      console.log('WebSocket connection is opening...');
+      logMessage('Connected to Gemini');
+
+      const setupMessage = {
+        setup: {
+          model: "models/gemini-2.0-flash-exp",
+          tools: [{
+            functionDeclarations: [{
+              name: "get_weather",
+              description: "Get current weather information for a city",
+              parameters: {
+                type: "OBJECT",
+                properties: {
+                  city: {
+                    type: "STRING",
+                    description: "The name of the city to get weather for"
+                  }
+                },
+                required: ["city"]
+              }
+            }]
+          },
+          {
+            codeExecution: {}
+          },
+          {
+            googleSearch: {}
+          }],
+          generation_config: {
+            response_modalities: ["audio"],
+            speech_config: {
+              voice_config: {
+                prebuilt_voice_config: {
+                  voice_name: "Aoede"
+                }
+              }
+            }
+          }
+        }
+      };
+
+      console.log('Sending setup message:', setupMessage);
+      ws.send(JSON.stringify(setupMessage));
+    };
+
+    ws.onmessage = async (event) => {
+      try {
+        let wsResponse;
+        if (event.data instanceof Blob) {
+          const responseText = await event.data.text();
+          wsResponse = JSON.parse(responseText);
+        } else {
+          wsResponse = JSON.parse(event.data);
+        }
+
+        console.log('WebSocket Response:', wsResponse);
+
+        if (wsResponse.setupComplete) {
+          document.getElementById('micButton').disabled = false;
+        } else if (wsResponse.toolCall) {
+          const functionCalls = wsResponse.toolCall.functionCalls;
+          const functionResponses = [];
+
+          // Handle function calls (weather only)
+          for (const call of functionCalls) {
+            if (call.name === 'get_weather') {
+              // Show the function call details
+              logMessage(`Function: ${call.name}`);
+              logMessage(`Parameters: city = "${call.args.city}"`);
+              
+              const weather = await getWeather(call.args.city);
+              console.log('Weather response:', weather);
+
+              // Show the API response
+              if (weather.error) {
+                logMessage(`API Response: ${weather.error}`);
+              } else {
+                logMessage('API Response:');
+                logMessage(`Temperature: ${weather.temperature}°C`);
+                logMessage(`Conditions: ${weather.description}`);
+                logMessage(`Humidity: ${weather.humidity}%`);
+                logMessage(`Wind Speed: ${weather.windSpeed} m/s`);
+                logMessage(`Location: ${weather.city}, ${weather.country}`);
+              }
+
+              functionResponses.push({
+                id: call.id,
+                name: call.name,
+                response: {
+                  result: {
+                    object_value: weather
+                  }
+                }
+              });
+            }
+          }
+
+          // Send tool response back
+          const toolResponse = {
+            tool_response: {
+              function_responses: functionResponses
+            }
+          };
+          console.log('Sending tool response:', toolResponse);
+          ws.send(JSON.stringify(toolResponse));
+        } else if (wsResponse.serverContent) {
+          // Check for interruption
+          if (wsResponse.serverContent.interrupted) {
+            logMessage('Gemini: Interrupted');
+            isInterrupted = true;
+            audioStreamer.stop();
+            return;
+          }
+
+          // Process audio data if present
+          if (wsResponse.serverContent.modelTurn?.parts?.[0]?.inlineData) {
+            const audioData = wsResponse.serverContent.modelTurn.parts[0].inlineData.data;
+            if (!audioStreamer.isPlaying) {
+              logMessage('Gemini: Speaking...');
+            }
+            await playAudioChunk(audioData);
+
+            // Always send continue signal unless explicitly complete
+            if (!wsResponse.serverContent.turnComplete) {
+              sendContinueSignal();
+            }
+          }
+
+          // Handle turn completion
+          if (wsResponse.serverContent.turnComplete) {
+            logMessage('Gemini: Finished speaking');
+            isInterrupted = false;  // Reset interruption state
+            audioStreamer.complete();
+          }
+        }
+      } catch (error) {
+        console.error('Error parsing response:', error);
+        logMessage('Error parsing response: ' + error.message);
+      }
+    };
+
+    function base64ToArrayBuffer(base64) {
+      const binaryString = atob(base64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      return bytes.buffer;
+    }
+
+    ws.onerror = (error) => {
+      console.error('WebSocket Error:', error);
+      logMessage('WebSocket Error: ' + error.message);
+    };
+
+    ws.onclose = (event) => {
+      console.log('Connection closed:', event);
+      logMessage(`Connection closed - Code: ${event.code}, Reason: ${event.reason}`);
+    };
+
+    function logMessage(message) {
+      const messageElement = document.createElement('p');
+      
+      // Add specific styling based on message content
+      if (message.startsWith('Function:')) {
+        messageElement.style.color = '#2196F3';  // Blue for function name
+        messageElement.style.fontWeight = 'bold';
+      } else if (message.startsWith('Parameters:')) {
+        messageElement.style.color = '#4CAF50';  // Green for parameters
+        messageElement.style.fontFamily = 'monospace';
+      } else if (message.startsWith('API Response:')) {
+        messageElement.style.color = '#FF9800';  // Orange for API response header
+        messageElement.style.fontWeight = 'bold';
+      } else if (message.match(/^(Temperature|Conditions|Humidity|Wind Speed|Location):/)) {
+        messageElement.style.marginLeft = '20px';  // Indent weather details
+        messageElement.style.color = '#666';      // Gray for weather details
+      }
+      
+      messageElement.textContent = message;
+      output.appendChild(messageElement);
+      
+      // Auto-scroll to bottom
+      output.scrollTop = output.scrollHeight;
+    }
+
+    window.toggleWebcam = async function() {
+      if (mediaHandler.isWebcamActive) {
+        mediaHandler.stopAll();
+        document.getElementById('webcamButton').innerHTML = 
+          '<span class="material-symbols-outlined">videocam</span>';
+      } else {
+        const success = await mediaHandler.startWebcam();
+        if (success) {
+          document.getElementById('webcamButton').innerHTML = 
+            '<span class="material-symbols-outlined">videocam_off</span>';
+          mediaHandler.startFrameCapture((base64Image) => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+              const message = {
+                realtimeInput: {
+                  mediaChunks: [{
+                    mime_type: "image/jpeg",
+                    data: base64Image
+                  }]
+                }
+              };
+              ws.send(JSON.stringify(message));
+            }
+          });
+        }
+      }
+    };
+
+    window.toggleScreen = async function() {
+      if (mediaHandler.isScreenActive) {
+        mediaHandler.stopAll();
+        document.getElementById('screenButton').innerHTML = 
+          '<span class="material-symbols-outlined">present_to_all</span>';
+      } else {
+        const success = await mediaHandler.startScreenShare();
+        if (success) {
+          document.getElementById('screenButton').innerHTML = 
+            '<span class="material-symbols-outlined">cancel_presentation</span>';
+          mediaHandler.startFrameCapture((base64Image) => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+              const message = {
+                realtimeInput: {
+                  mediaChunks: [{
+                    mime_type: "image/jpeg",
+                    data: base64Image
+                  }]
+                }
+              };
+              ws.send(JSON.stringify(message));
+            }
+          });
+        }
+      }
+    };
+  </script>
+</body>
+</html>
