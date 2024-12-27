@@ -6,7 +6,7 @@ This repository serves as a comprehensive developer guide for Google's Gemini Mu
 
 ## Repository Structure
 
-The guide is divided into chapters that progressively introduce different aspects of the Gemini Multimodal Live API. **Chapters 1 and 2 utilize the Python SDK (`google-genai`) to provide an initial understanding of interacting with the API. Chapters 3, 4, and 5 then shift to using JavaScript and the low-level WebSocket API directly in the browser.**
+The guide is divided into chapters that progressively introduce different aspects of the Gemini Multimodal Live API. **Chapters 1 and 2 utilize the Python SDK (`google-genai`) to provide an initial understanding of interacting with the API. Chapters 3, 4, and 5 then shift to using JavaScript and the low-level WebSocket API directly in the browser. Chapter 6 builds upon this foundation to create a truly multimodal experience with both audio and video.**
 
 **Why the Switch to JavaScript and WebSockets?**
 
@@ -49,6 +49,31 @@ The repository is organized into the following chapters:
     *   This chapter tackles advanced topics like live microphone input, bidirectional audio streaming, intricate audio format conversions, precise audio chunking, and robust state management for interruptions and turn-taking.
     *   The detailed `README.md` file in `chapter_05` provides an in-depth tutorial on building such an application, explaining the design choices, trade-offs, and best practices discovered during development.
 
+*   **[`chapter_06`](chapter_06)**: **Gemini Live Chat - Real-time Multimodal Interaction with WebSockets**
+    *   This chapter enhances the audio chat application from Chapter 5 by adding support for live video input through webcam and screen sharing capabilities.
+    *   The implementation includes several JavaScript modules: `media-handler.js` for managing video streams, along with enhanced versions of the audio handling modules from Chapter 5.
+    *   You'll learn about capturing and processing video frames, efficient JPEG encoding for transmission, managing multiple media streams simultaneously, and creating a polished UI with Material Design elements.
+    *   The chapter's `README.md` provides comprehensive coverage of important considerations like token usage optimization, frame rate selection, and quality settings for video transmission.
+
+## Prerequisites
+
+Before starting this tutorial, ensure you have the following:
+
+### Required
+* A Google Developer API Key from [Google AI Studio](https://aistudio.google.com/apikey)
+* Python 3.9 or higher installed on your system
+* A modern web browser (Chrome, Firefox, or Edge recommended)
+* A microphone for audio input (required for Chapters 2, 5, and 6)
+* A webcam for video input (required for Chapter 6)
+
+### Development Environment
+* A code editor or IDE
+* Basic familiarity with:
+  * Python programming
+  * JavaScript and HTML
+  * Terminal/Command Line usage
+
+
 ## How to Use This Guide
 
 1. **Prerequisites:**
@@ -59,7 +84,8 @@ The repository is organized into the following chapters:
 4. **Explore Chapter 3:** Move on to `chapter_03` to understand the underlying WebSocket communication. Open the `index.html` file in your browser and examine the JavaScript code along with the accompanying `README.md`.
 5. **Experiment with Chapter 4:** Open the `index.html` file from `chapter_04` in your browser. Follow the instructions in the chapter's `README.md` to input text and hear the generated audio.
 6. **Tackle Chapter 5:** Open the `index.html` file from `chapter_05` in your browser. Follow the instructions in the chapter's `README.md` to start the audio chat.
-7. **Further Exploration:** Feel free to modify the code examples, experiment with different parameters (e.g., `CHUNK_SIZE`, `SEND_SAMPLE_RATE`), and explore the API documentation to deepen your understanding.
+7. **Experience Chapter 6:** Open the `index.html` file from `chapter_06` in your browser to explore the multimodal chat application with audio and video capabilities. Follow the chapter's `README.md` for detailed instructions on using webcam and screen sharing features.
+8. **Further Exploration:** Feel free to modify the code examples, experiment with different parameters (e.g., `CHUNK_SIZE`, `SEND_SAMPLE_RATE`), and explore the API documentation to deepen your understanding.
 
 ## Key Concepts
 
@@ -75,6 +101,9 @@ This guide covers several important concepts related to the Gemini Multimodal Li
 *   **Turn-Taking:** Managing the flow of conversation between the user and the model.
 *   **Audio Encoding and Decoding:** Handling different audio formats and converting between them.
 *   **Browser Audio Playback:** Using the `AudioContext` API for real-time audio playback in the browser.
+*   **Video Stream Management:** Capturing and managing webcam and screen sharing streams using the `MediaDevices` API.
+*   **Frame Processing:** Capturing, encoding, and transmitting video frames efficiently using canvas and JPEG compression.
+*   **Multimodal Integration:** Combining audio and video streams for rich, interactive experiences with the API.
 
 ## Contributing
 
@@ -82,4 +111,8 @@ This repository is currently not accepting contributions, as it's meant to be a 
 
 ## License
 
-This project is licensed under the MIT License.
+This project is licensed under the Apache License.
+
+## Disclaimer
+
+This is not an officially supported Google project.
