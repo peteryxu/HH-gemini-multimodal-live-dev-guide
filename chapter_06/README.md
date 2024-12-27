@@ -109,12 +109,9 @@ This chapter's application consists of the following files:
 *   **Scalability:** This example is designed for a single user. For a multi-user scenario, you would need to manage multiple WebSocket connections and potentially use a server-side component to handle user sessions and routing.
 *   **Audio Quality:** The audio quality depends on the microphone, network conditions, and the API's processing. You can experiment with different sample rates and chunk sizes, but these values are often constrained by the API's requirements and the need to balance latency and bandwidth.
 *   **Network Latency:** Network latency can significantly impact the real-time performance of the application. There's no single solution to mitigate network latency, but using a server closer to the user's location and optimizing the audio processing pipeline can help.
-*   **Audio Level:** There is a `gainNode` to allow for controlling the volume of the output audio in the `AudioStreamer`. This is not used yet but could be exposed to the user through the UI if needed.
 *   **Video Quality:** Currently, video frames are captured every 500ms at a quality setting of 0.8. While the quality setting affects network bandwidth usage, it's important to note that it has no impact on token consumption - each frame will use 258 tokens regardless of its compression level or file size. You can adjust the quality parameter and `captureRate` based on your network bandwidth requirements without worrying about token usage.
 *   **Bandwidth Usage:** Sending video frames in addition to audio increases bandwidth consumption. Consider the user's network conditions and potentially provide options to adjust video quality or frame rate.
-*   **API Limitations:** Be aware of any limitations imposed by the Gemini API regarding the size or frequency of video data sent. The documentation should provide guidelines on acceptable usage.
-*   **Frame Rate:** The frame rate for video capture is currently set to 2 frames per second (500ms interval). This is a relatively low frame rate, chosen to reduce bandwidth usage. Increasing the frame rate will result in smoother video but will also increase the amount of data sent to the API.
-*   **Codec and Encoding:** The code currently encodes video frames as JPEG images. You could explore other image formats (like PNG) or consider using video codecs (like VP8 or H.264) for more efficient compression, but this would require more complex encoding and decoding logic. The Gemini API documentation should specify the supported image and video formats.
+
 
 ## Summary
 
