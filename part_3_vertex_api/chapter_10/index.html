@@ -19,21 +19,10 @@
 <head>
   <title>Gemini Audio-to-Audio WebSocket Demo</title>
   <link rel="stylesheet" href="style.css">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
 <body>
   <div class="input-container">
     <button id="micButton" onclick="toggleMicrophone()" disabled>Start Mic</button>
-    <button id="webcamButton" onclick="toggleWebcam()" class="action-button">
-      <span class="material-symbols-outlined">videocam</span>
-    </button>
-    <button id="screenButton" onclick="toggleScreen()" class="action-button">
-      <span class="material-symbols-outlined">present_to_all</span>
-    </button>
-  </div>
-  <div class="video-container">
-    <video id="videoPreview" autoplay playsinline class="hidden"></video>
   </div>
   <div id="output"></div>
 
@@ -47,7 +36,6 @@
   <script type="module">
     import { AudioRecorder } from 'http://localhost:8000/shared/audio-recorder.js';
     import { AudioStreamer } from 'http://localhost:8000/shared/audio-streamer.js';
-    import { MediaHandler } from 'http://localhost:8000/shared/media-handler.js';
 
     const output = document.getElementById('output');
     const PROXY_URL = 'ws://localhost:8080';
@@ -60,7 +48,6 @@
     let isRecording = false;
     let initialized = false;
     let isInterrupted = false;
-    let mediaHandler;
 
     const setupConfig = {
       model: `projects/${PROJECT_ID}/locations/${LOCATION}/publishers/google/models/gemini-2.0-flash-exp`,
@@ -76,13 +63,7 @@
       }
     };
 
-    // Created in global scope
     const geminiAPI = new GeminiLiveAPI(PROXY_URL, true, setupConfig);
-
-    window.addEventListener('DOMContentLoaded', () => {
-      mediaHandler = new MediaHandler();
-      mediaHandler.initialize(document.getElementById('videoPreview'));
-    });
 
     // Initialize audio when sending the first message
     async function ensureAudioInitialized() {
@@ -110,6 +91,7 @@
     async function startRecording() {
       try {
         await ensureAudioInitialized();
+        await geminiAPI.ensureConnected();
 
         // Reset state when starting new recording
         isInterrupted = false;
@@ -139,12 +121,8 @@
         isRecording = false;
         document.getElementById('micButton').textContent = 'Start Mic';
         
-        // Stop video streams when stopping recording
-        mediaHandler.stopAll();
-        document.getElementById('webcamButton').innerHTML = 
-          '<span class="material-symbols-outlined">videocam</span>';
-        document.getElementById('screenButton').innerHTML = 
-          '<span class="material-symbols-outlined">present_to_all</span>';
+        // Reset interruption state when stopping recording
+        isInterrupted = false;
         
         geminiAPI.sendEndMessage();
       }
@@ -205,60 +183,6 @@
       messageElement.textContent = message;
       output.appendChild(messageElement);
     }
-
-    window.toggleWebcam = async function() {
-      if (mediaHandler.isWebcamActive) {
-        mediaHandler.stopAll();
-        document.getElementById('webcamButton').innerHTML = 
-          '<span class="material-symbols-outlined">videocam</span>';
-      } else {
-        const success = await mediaHandler.startWebcam();
-        if (success) {
-          document.getElementById('webcamButton').innerHTML = 
-            '<span class="material-symbols-outlined">videocam_off</span>';
-          mediaHandler.startFrameCapture((base64Image) => {
-            if (geminiAPI.ws.readyState === WebSocket.OPEN) {
-              const message = {
-                realtimeInput: {
-                  mediaChunks: [{
-                    mime_type: "image/jpeg",
-                    data: base64Image
-                  }]
-                }
-              };
-              geminiAPI.ws.send(JSON.stringify(message));
-            }
-          });
-        }
-      }
-    };
-
-    window.toggleScreen = async function() {
-      if (mediaHandler.isScreenActive) {
-        mediaHandler.stopAll();
-        document.getElementById('screenButton').innerHTML = 
-          '<span class="material-symbols-outlined">present_to_all</span>';
-      } else {
-        const success = await mediaHandler.startScreenShare();
-        if (success) {
-          document.getElementById('screenButton').innerHTML = 
-            '<span class="material-symbols-outlined">cancel_presentation</span>';
-          mediaHandler.startFrameCapture((base64Image) => {
-            if (geminiAPI.ws.readyState === WebSocket.OPEN) {
-              const message = {
-                realtimeInput: {
-                  mediaChunks: [{
-                    mime_type: "image/jpeg",
-                    data: base64Image
-                  }]
-                }
-              };
-              geminiAPI.ws.send(JSON.stringify(message));
-            }
-          });
-        }
-      }
-    };
   </script>
 </body>
 </html>

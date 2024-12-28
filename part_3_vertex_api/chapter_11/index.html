@@ -19,6 +19,7 @@
 <head>
   <title>Gemini Audio-to-Audio WebSocket Demo</title>
   <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
 </head>
 <body>
@@ -47,13 +48,12 @@
     import { AudioRecorder } from 'http://localhost:8000/shared/audio-recorder.js';
     import { AudioStreamer } from 'http://localhost:8000/shared/audio-streamer.js';
     import { MediaHandler } from 'http://localhost:8000/shared/media-handler.js';
-    import { getWeather } from 'http://localhost:8000/shared/weather-api.js';
 
     const output = document.getElementById('output');
     const PROXY_URL = 'ws://localhost:8080';
     const PROJECT_ID = 'heikohotz-genai-sa';
     const LOCATION = 'us-central1';
-
+    
     let audioContext;
     let audioStreamer;
     let audioRecorder;
@@ -64,22 +64,6 @@
 
     const setupConfig = {
       model: `projects/${PROJECT_ID}/locations/${LOCATION}/publishers/google/models/gemini-2.0-flash-exp`,
-      tools: [{
-        functionDeclarations: [{
-          name: "get_weather",
-          description: "Get current weather information for a city",
-          parameters: {
-            type: "OBJECT",
-            properties: {
-              city: {
-                type: "STRING",
-                description: "The name of the city to get weather for"
-              }
-            },
-            required: ["city"]
-          }
-        }]
-      }],
       generation_config: {
         response_modalities: ["audio"],
         speech_config: {
@@ -92,10 +76,10 @@
       }
     };
 
+    // Created in global scope
     const geminiAPI = new GeminiLiveAPI(PROXY_URL, true, setupConfig);
 
-
-    document.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', () => {
       mediaHandler = new MediaHandler();
       mediaHandler.initialize(document.getElementById('videoPreview'));
     });
@@ -218,23 +202,8 @@
 
     function logMessage(message) {
       const messageElement = document.createElement('p');
-      
-      // Add specific styling based on message content
-      if (message.startsWith('Function:')) {
-        messageElement.className = 'function-name';
-      } else if (message.startsWith('Parameters:')) {
-        messageElement.className = 'function-params';
-      } else if (message.startsWith('API Response:')) {
-        messageElement.className = 'api-response';
-      } else if (message.match(/^(Temperature|Conditions|Humidity|Wind Speed|Location):/)) {
-        messageElement.className = 'weather-info';
-      }
-      
       messageElement.textContent = message;
       output.appendChild(messageElement);
-      
-      // Auto-scroll to bottom
-      output.scrollTop = output.scrollHeight;
     }
 
     window.toggleWebcam = async function() {
@@ -289,49 +258,6 @@
           });
         }
       }
-    };
-
-    // Add function call handler
-    geminiAPI.onToolCall = async (toolCall) => {
-      const functionCalls = toolCall.functionCalls;
-      const functionResponses = [];
-
-      // Handle function calls (weather only)
-      for (const call of functionCalls) {
-        if (call.name === 'get_weather') {
-          // Show the function call details
-          logMessage(`Function: ${call.name}`);
-          logMessage(`Parameters: city = "${call.args.city}"`);
-          
-          const weather = await getWeather(call.args.city);
-          console.log('Weather response:', weather);
-
-          // Show the API response
-          if (weather.error) {
-            logMessage(`API Response: ${weather.error}`);
-          } else {
-            logMessage('API Response:');
-            logMessage(`Temperature: ${weather.temperature}°C`);
-            logMessage(`Conditions: ${weather.description}`);
-            logMessage(`Humidity: ${weather.humidity}%`);
-            logMessage(`Wind Speed: ${weather.windSpeed} m/s`);
-            logMessage(`Location: ${weather.city}, ${weather.country}`);
-          }
-
-          functionResponses.push({
-            id: call.id,
-            name: call.name,
-            response: {
-              result: {
-                object_value: weather
-              }
-            }
-          });
-        }
-      }
-
-      // Send tool response back using the API
-      geminiAPI.sendToolResponse(functionResponses);
     };
   </script>
 </body>

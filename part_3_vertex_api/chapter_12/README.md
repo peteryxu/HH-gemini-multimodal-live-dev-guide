@@ -1,3 +1,3 @@
-# Chapter 8: Mobile app (similar to Project Astra)
+# Chapter 7: Function calling
 
 Work in progress
