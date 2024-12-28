@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-const OPENWEATHER_API_KEY = 'cbea671cecf62d52e259b2fb10278f53';
+const OPENWEATHER_API_KEY = '<YOUR_API_KEY>';
 
 export async function getWeather(city) {
   try {
