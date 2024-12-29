@@ -22,7 +22,7 @@ import google.auth
 from google.auth.transport.requests import Request
 from websockets.legacy.protocol import WebSocketCommonProtocol
 from websockets.legacy.server import WebSocketServerProtocol
-import os
+
 
 print("DEBUG: proxy.py - Starting script...")  # Add print here
 
