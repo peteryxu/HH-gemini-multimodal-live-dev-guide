@@ -56,6 +56,7 @@
     import { AudioStreamer } from './shared/audio-streamer.js';
     import { MediaHandler } from './shared/media-handler.js';
     import { getWeather } from './shared/weather-api.js';
+    import { getStockPrice } from './shared/stock-api.js';
     import { statusHandler } from './status-handler.js';
 
     console.log('Script started, setting up WebSocket...');
@@ -106,6 +107,20 @@
                   }
                 },
                 required: ["city"]
+              }
+            },
+            {
+              name: "get_stock_price",
+              description: "Get current stock price and related information for a given stock symbol",
+              parameters: {
+                type: "OBJECT",
+                properties: {
+                  symbol: {
+                    type: "STRING",
+                    description: "The stock symbol to get price information for (e.g., AAPL, GOOGL)"
+                  }
+                },
+                required: ["symbol"]
               }
             }]
           },
@@ -347,6 +362,33 @@
               response: {
                 result: {
                   object_value: weather
+                }
+              }
+            });
+          } else if (call.name === 'get_stock_price') {
+            console.log('Executing stock price function call for:', call.args.symbol);
+            // Update status before making the API call
+            statusHandler.update('get_stock_price', { 
+              symbol: call.args.symbol, 
+              status: 'requesting' 
+            });
+
+            const stockData = await getStockPrice(call.args.symbol);
+            console.log('Stock response:', stockData);
+            
+            // Update status with the stock results
+            statusHandler.update('get_stock_price', { 
+              symbol: call.args.symbol, 
+              status: 'received',
+              stock: stockData 
+            });
+
+            functionResponses.push({
+              id: call.id,
+              name: call.name,
+              response: {
+                result: {
+                  object_value: stockData
                 }
               }
             });
