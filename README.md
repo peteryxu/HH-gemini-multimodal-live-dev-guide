@@ -44,20 +44,20 @@ The guide progresses from basic concepts to advanced implementations, culminatin
 
 ## Guide Structure
 
-### Part 1: Introduction to Gemini's Multimodal Live API
+### [Part 1](part_1_intro): Introduction to Gemini's Multimodal Live API
 Basic concepts and SDK usage:
 - SDK setup and authentication
 - Text and audio interactions
 - Real-time audio chat implementation
 
-### Part 2: WebSocket Development with [Gemini Developer API](https://ai.google.dev/api/multimodal-live)
+### [Part 2](part_2_dev_api): WebSocket Development with [Gemini Developer API](https://ai.google.dev/api/multimodal-live)
 Direct WebSocket implementation, building towards Project Pastra - a production-ready multimodal AI assistant inspired by Project Astra:
 - Low-level WebSocket communication
 - Audio and video streaming
 - Function calling and system instructions
 - Mobile-first deployment
 
-### Part 3: WebSocket Development with [Vertex AI API](https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/multimodal-live)
+### [Part 3](part_3_vertex_api): WebSocket Development with [Vertex AI API](https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/multimodal-live)
 Enterprise-grade implementation using Vertex AI, mirroring Part 2's journey with production-focused architecture:
 - Proxy-based authentication
 - Service account integration
