@@ -33,6 +33,9 @@
     <button id="switchCameraButton" onclick="switchCamera()" class="action-button hidden">
       <span class="material-symbols-outlined">flip_camera_ios</span>
     </button>
+    <button id="screenButton" onclick="toggleScreen()" class="action-button hidden">
+      <span class="material-symbols-outlined">present_to_all</span>
+    </button>
   </div>
   <div id="functionInfo" class="function-info">
     Waiting for function calls...
@@ -45,18 +48,18 @@
   <script src="https://cdn.jsdelivr.net/npm/eventemitter3@5.0.1/dist/eventemitter3.umd.min.js"></script>
 
   <!-- Load our API class -->
-  <script src="http://localhost:8000/shared/gemini-live-api.js"></script>
+  <script src="shared/gemini-live-api.js"></script>
 
   <!-- Then load our module code -->
   <script type="module">
-    import { AudioRecorder } from 'http://localhost:8000/shared/audio-recorder.js';
-    import { AudioStreamer } from 'http://localhost:8000/shared/audio-streamer.js';
-    import { MediaHandler } from 'http://localhost:8000/shared/media-handler.js';
-    import { getWeather } from 'http://localhost:8000/shared/weather-api.js';
+    import { AudioRecorder } from './shared/audio-recorder.js';
+    import { AudioStreamer } from './shared/audio-streamer.js';
+    import { MediaHandler } from './shared/media-handler.js';
+    import { getWeather } from './shared/weather-api.js';
     import { statusHandler } from './status-handler.js';
 
     console.log('Script started, setting up WebSocket...');
-    const apiKey = '<YOUR_API_KEY>';
+    const apiKey = 'AIzaSyArmgpVkSqlG6irjprLn0vAaO2w2RzPba0';
     const host = 'generativelanguage.googleapis.com';
     const endpoint = `wss://${host}/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${apiKey}`;
 
@@ -67,9 +70,7 @@
     let initialized = false;
     let isInterrupted = false;
     let mediaHandler;
-
-    // Create GeminiLiveAPI instance but don't send setup message yet
-    const geminiAPI = new GeminiLiveAPI(endpoint, false);  // Pass false to prevent auto-setup
+    let geminiAPI;  // Will be initialized with setup
 
     document.addEventListener('DOMContentLoaded', () => {
       console.log('DOM loaded, initializing media handler');
@@ -81,6 +82,13 @@
       }
       mediaHandler.initialize(videoElement);
 
+      // Create initial API instance and setup
+      geminiAPI = new GeminiLiveAPI(endpoint, false);
+      setupGeminiHandlers();
+      sendCustomSetup();
+    });
+
+    function sendCustomSetup() {
       // Send custom setup message
       const setupMessage = {
         setup: {
@@ -112,15 +120,16 @@
             speech_config: {
               voice_config: {
                 prebuilt_voice_config: {
-                  voice_name: "Aoede"
+                  voice_name: "Puck"
                 }
               }
             }
           }
         }
       };
+      console.log('Sending setup message:', setupMessage);
       geminiAPI.sendSetupMessage(setupMessage);
-    });
+    }
 
     async function ensureAudioInitialized() {
       if (!initialized) {
@@ -160,6 +169,26 @@
           audioStreamer.stop();
         }
 
+        // Reinitialize Gemini API if WebSocket is closed
+        if (!geminiAPI || geminiAPI.ws.readyState !== WebSocket.OPEN) {
+          console.log('WebSocket not open, reinitializing...');
+          geminiAPI = new GeminiLiveAPI(endpoint, false);
+          // Reattach event handlers
+          setupGeminiHandlers();
+          // Send custom setup and wait for completion
+          await new Promise((resolve) => {
+            geminiAPI.onSetupComplete = () => {
+              resolve();
+              document.getElementById('micButton').disabled = false;
+              // Only show screen share button on non-mobile devices
+              if (!(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))) {
+                document.getElementById('screenButton').classList.remove('hidden');
+              }
+            };
+            sendCustomSetup();
+          });
+        }
+
         console.log('Creating new audio recorder');
         audioRecorder = new AudioRecorder();
         await audioRecorder.start();
@@ -189,7 +218,9 @@
         mediaHandler.stopAll();
         document.getElementById('webcamButton').innerHTML = '<span class="material-symbols-outlined">videocam</span>';
         document.getElementById('switchCameraButton').classList.add('hidden');
+        document.getElementById('screenButton').innerHTML = '<span class="material-symbols-outlined">present_to_all</span>';
         
+        // Send end message before closing
         geminiAPI.sendEndMessage();
         console.log('Recording stopped');
       }
@@ -235,23 +266,118 @@
       }
     };
 
+    window.toggleScreen = async function() {
+      console.log('Toggle screen, current state:', mediaHandler.isScreenActive);
+      if (mediaHandler.isScreenActive) {
+        mediaHandler.stopAll();
+        document.getElementById('screenButton').innerHTML = '<span class="material-symbols-outlined">present_to_all</span>';
+      } else {
+        const success = await mediaHandler.startScreenShare();
+        if (success) {
+          document.getElementById('screenButton').innerHTML = '<span class="material-symbols-outlined">cancel_presentation</span>';
+          mediaHandler.startFrameCapture((base64Image) => {
+            if (geminiAPI.ws.readyState === WebSocket.OPEN) {
+              const message = {
+                realtimeInput: {
+                  mediaChunks: [{
+                    mime_type: "image/jpeg",
+                    data: base64Image
+                  }]
+                }
+              };
+              geminiAPI.ws.send(JSON.stringify(message));
+            }
+          });
+        }
+      }
+    };
+
     window.switchCamera = async function() {
       await mediaHandler.switchCamera();
     };
 
-    // Set up API callbacks
-    geminiAPI.onSetupComplete = () => {
-      console.log('Setup complete, enabling mic button');
-      document.getElementById('micButton').disabled = false;
-    };
+    // Function to set up Gemini API event handlers
+    function setupGeminiHandlers() {
+      console.log('Setting up Gemini API handlers');
+      
+      geminiAPI.onSetupComplete = () => {
+        console.log('Setup complete, enabling mic button');
+        document.getElementById('micButton').disabled = false;
+        // Only show screen share button on non-mobile devices
+        if (!(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))) {
+          document.getElementById('screenButton').classList.remove('hidden');
+        }
+      };
 
-    geminiAPI.onAudioData = async (audioData) => {
-      console.log('Received audio data');
-      if (!audioStreamer?.isPlaying) {
-        console.log('Gemini speaking...');
-      }
-      await playAudioChunk(audioData);
-    };
+      geminiAPI.onAudioData = async (audioData) => {
+        console.log('Received audio data');
+        if (!audioStreamer?.isPlaying) {
+          console.log('Gemini speaking...');
+        }
+        await playAudioChunk(audioData);
+      };
+
+      geminiAPI.onToolCall = async (toolCall) => {
+        console.log('Received tool call:', toolCall);
+        const functionCalls = toolCall.functionCalls;
+        const functionResponses = [];
+
+        for (const call of functionCalls) {
+          if (call.name === 'get_weather') {
+            console.log('Executing weather function call for:', call.args.city);
+            // Update status before making the API call
+            statusHandler.update('get_weather', { 
+              city: call.args.city, 
+              status: 'requesting' 
+            });
+
+            const weather = await getWeather(call.args.city);
+            console.log('Weather response:', weather);
+            
+            // Update status with the weather results
+            statusHandler.update('get_weather', { 
+              city: call.args.city, 
+              status: 'received',
+              weather: weather 
+            });
+
+            functionResponses.push({
+              id: call.id,
+              name: call.name,
+              response: {
+                result: {
+                  object_value: weather
+                }
+              }
+            });
+          }
+        }
+
+        if (functionResponses.length > 0) {
+          geminiAPI.sendToolResponse(functionResponses);
+        }
+      };
+
+      geminiAPI.onInterrupted = () => {
+        console.log('Gemini interrupted');
+        isInterrupted = true;
+        audioStreamer?.stop();
+      };
+
+      geminiAPI.onTurnComplete = () => {
+        console.log('Gemini finished speaking');
+        isInterrupted = false;
+        audioStreamer?.complete();
+      };
+
+      geminiAPI.onError = (error) => {
+        console.error('Error:', error);
+      };
+
+      geminiAPI.onClose = (event) => {
+        console.log('Connection closed:', event.code, event.reason);
+      };
+    }
 
     async function playAudioChunk(base64AudioChunk) {
       try {
@@ -273,67 +399,6 @@
       }
       return bytes.buffer;
     }
-
-    geminiAPI.onToolCall = async (toolCall) => {
-      console.log('Received tool call:', toolCall);
-      const functionCalls = toolCall.functionCalls;
-      const functionResponses = [];
-
-      for (const call of functionCalls) {
-        if (call.name === 'get_weather') {
-          console.log('Executing weather function call for:', call.args.city);
-          // Update status before making the API call
-          statusHandler.update('get_weather', { 
-            city: call.args.city, 
-            status: 'requesting' 
-          });
-
-          const weather = await getWeather(call.args.city);
-          console.log('Weather response:', weather);
-          
-          // Update status with the weather results
-          statusHandler.update('get_weather', { 
-            city: call.args.city, 
-            status: 'received',
-            weather: weather 
-          });
-
-          functionResponses.push({
-            id: call.id,
-            name: call.name,
-            response: {
-              result: {
-                object_value: weather
-              }
-            }
-          });
-        }
-      }
-
-      if (functionResponses.length > 0) {
-        geminiAPI.sendToolResponse(functionResponses);
-      }
-    };
-
-    geminiAPI.onInterrupted = () => {
-      console.log('Gemini interrupted');
-      isInterrupted = true;
-      audioStreamer?.stop();
-    };
-
-    geminiAPI.onTurnComplete = () => {
-      console.log('Gemini finished speaking');
-      isInterrupted = false;
-      audioStreamer?.complete();
-    };
-
-    geminiAPI.onError = (error) => {
-      console.error('Error:', error);
-    };
-
-    geminiAPI.onClose = (event) => {
-      console.log('Connection closed:', event.code, event.reason);
-    };
   </script>
 </body>
 </html>

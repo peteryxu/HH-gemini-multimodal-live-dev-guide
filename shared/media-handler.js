@@ -21,19 +21,26 @@ export class MediaHandler {
     this.isWebcamActive = false;
     this.isScreenActive = false;
     this.frameCapture = null;
+    this.frameCallback = null;
+    this.usingFrontCamera = true;
   }
 
   initialize(videoElement) {
     this.videoElement = videoElement;
   }
 
-  async startWebcam() {
+  async startWebcam(useFrontCamera = true) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { width: 1280, height: 720 } 
+        video: { 
+          width: 1280, 
+          height: 720,
+          facingMode: useFrontCamera ? "user" : "environment"
+        } 
       });
       this.handleNewStream(stream);
       this.isWebcamActive = true;
+      this.usingFrontCamera = useFrontCamera;
       return true;
     } catch (error) {
       console.error('Error accessing webcam:', error);
@@ -59,6 +66,17 @@ export class MediaHandler {
       console.error('Error sharing screen:', error);
       return false;
     }
+  }
+
+  async switchCamera() {
+    if (!this.isWebcamActive) return false;
+    const newFacingMode = !this.usingFrontCamera;
+    await this.stopAll();
+    const success = await this.startWebcam(newFacingMode);
+    if (success && this.frameCallback) {
+      this.startFrameCapture(this.frameCallback);
+    }
+    return success;
   }
 
   handleNewStream(stream) {
@@ -87,6 +105,7 @@ export class MediaHandler {
   }
 
   startFrameCapture(onFrame) {
+    this.frameCallback = onFrame;
     const captureFrame = () => {
       if (!this.currentStream || !this.videoElement) return;
       
@@ -99,7 +118,7 @@ export class MediaHandler {
       
       // Convert to JPEG and base64 encode
       const base64Image = canvas.toDataURL('image/jpeg', 0.8).split(',')[1];
-      onFrame(base64Image);
+      this.frameCallback(base64Image);
     };
 
     // Capture frames at 2fps
