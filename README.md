@@ -2,7 +2,7 @@
 
 ![Project Pastra](assets/project_pastra.png)
 
-This repository serves as a comprehensive developer guide for Google's Gemini Multimodal Live API. Through a structured, hands-on approach, you'll learn how to build sophisticated real-time applications that can see, hear, and interact naturally using Gemini's multimodal capabilities.
+This repository serves as a comprehensive developer guide for [Google's Gemini Multimodal Live API](https://developers.googleblog.com/en/gemini-2-0-level-up-your-apps-with-real-time-multimodal-interactions/). Through a structured, hands-on approach, you'll learn how to build sophisticated real-time applications that can see, hear, and interact naturally using Gemini's multimodal capabilities.
 
 ## What You'll Learn
 
@@ -13,7 +13,7 @@ By following this guide, you'll be able to:
 - Deploy production-ready AI assistants
 - Choose between Development API and Vertex AI implementations
 
-The guide progresses from basic concepts to advanced implementations, culminating in a Project Astra-inspired AI assistant that demonstrates the full potential of the Gemini Multimodal Live API.
+The guide progresses from basic concepts to advanced implementations, culminating in a [Project Astra](https://deepmind.google/technologies/project-astra/)-inspired AI assistant that demonstrates the full potential of the Gemini Multimodal Live API.
 
 ## Key Concepts Covered
 
