@@ -71,7 +71,8 @@
     let initialized = false;
     let isInterrupted = false;
     let mediaHandler;
-    let geminiAPI;  // Will be initialized with setup
+    let systemInstructions = '';  // Store system instructions for reconnection
+    let geminiAPI;  // Will be initialized after loading system instructions
 
     document.addEventListener('DOMContentLoaded', () => {
       console.log('DOM loaded, initializing media handler');
@@ -83,17 +84,28 @@
       }
       mediaHandler.initialize(videoElement);
 
-      // Create initial API instance and setup
-      geminiAPI = new GeminiLiveAPI(endpoint, false);
-      setupGeminiHandlers();
-      sendCustomSetup();
+      // Load system instructions and send custom setup message
+      fetch('system-instructions.txt')
+        .then(response => response.text())
+        .then(instructions => {
+          systemInstructions = instructions;  // Store for later use
+          // Create initial API instance
+          geminiAPI = new GeminiLiveAPI(endpoint, false);
+          setupGeminiHandlers();
+          sendCustomSetup(instructions);
+        });
     });
 
-    function sendCustomSetup() {
-      // Send custom setup message
+    function sendCustomSetup(systemInstructions) {
       const setupMessage = {
         setup: {
           model: "models/gemini-2.0-flash-exp",
+          system_instruction: {
+            role: "user",
+            parts: [{
+              text: systemInstructions
+            }]
+          },
           tools: [{
             functionDeclarations: [{
               name: "get_weather",
@@ -200,7 +212,7 @@
                 document.getElementById('screenButton').classList.remove('hidden');
               }
             };
-            sendCustomSetup();
+            sendCustomSetup(systemInstructions);
           });
         }
 
