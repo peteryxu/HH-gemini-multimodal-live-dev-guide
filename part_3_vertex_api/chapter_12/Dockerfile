@@ -32,7 +32,7 @@ python /app/proxy/proxy.py 2>&1 | tee /var/log/proxy.log &\n\
 PROXY_PID=$!\n\
 \n\
 # Give proxy a moment to start\n\
-sleep 2\n\
+sleep 10\n\
 \n\
 # Check if proxy is still running\n\
 if ! kill -0 $PROXY_PID 2>/dev/null; then\n\
