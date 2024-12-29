@@ -1,6 +1,6 @@
-# Gemini Multimodal Live API Developer Guide
+# Project Pastra - A Gemini Multimodal Live API Developer Guide
 
-![Gemini API Developer Guide](assets/mm_live_api.jpg)
+![Project Pastra](assets/project_pastra.png)
 
 This repository serves as a comprehensive developer guide for Google's Gemini Multimodal Live API. Through a structured, hands-on approach, you'll learn how to build sophisticated real-time applications that can see, hear, and interact naturally using Gemini's multimodal capabilities.
 
@@ -44,20 +44,20 @@ The guide progresses from basic concepts to advanced implementations, culminatin
 
 ## Guide Structure
 
-### Part 1: Introduction to Gemini AI
+### Part 1: Introduction to Gemini's Multimodal Live API
 Basic concepts and SDK usage:
 - SDK setup and authentication
 - Text and audio interactions
 - Real-time audio chat implementation
 
-### Part 2: WebSocket Development with Gemini API
+### Part 2: WebSocket Development with [Gemini Developer API](https://ai.google.dev/api/multimodal-live)
 Direct WebSocket implementation, building towards Project Pastra - a production-ready multimodal AI assistant inspired by Project Astra:
 - Low-level WebSocket communication
 - Audio and video streaming
 - Function calling and system instructions
 - Mobile-first deployment
 
-### Part 3: Vertex AI Implementation
+### Part 3: WebSocket Development with [Vertex AI API](https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/multimodal-live)
 Enterprise-grade implementation using Vertex AI, mirroring Part 2's journey with production-focused architecture:
 - Proxy-based authentication
 - Service account integration
@@ -68,7 +68,7 @@ Enterprise-grade implementation using Vertex AI, mirroring Part 2's journey with
 
 Below is a comprehensive overview of where each feature is implemented across the Development API and Vertex AI versions:
 
-| Feature | Dev API Chapter | Vertex AI Chapter |
+| Feature | Part 2 - Dev API Chapter | Part 3 - Vertex AI Chapter |
 |---------|----------------|-------------------|
 | Basic WebSocket Setup | [Chapter 3](part_2_dev_api/chapter_03) | - |
 | Text-to-Speech | [Chapter 4](part_2_dev_api/chapter_04) | - |
@@ -82,7 +82,8 @@ Note: Vertex AI implementation starts directly with advanced features, skipping 
 ## Prerequisites
 
 - Google Cloud Project (for Vertex AI)
-- API access (Development API key or Service Account)
+- [AI Studio API key](https://aistudio.google.com/app/apikey) (for Gemini Developer API)
+- OpenWeather API key (if you want to use the weather tool)
 - Python 3.9 or higher
 - Modern web browser
 - Basic understanding of:
@@ -116,6 +117,4 @@ Note: Vertex AI implementation starts directly with advanced features, skipping 
 ## License
 
 This project is licensed under the Apache License.
-
-**Status: Under Construction**
 
