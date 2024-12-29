@@ -14,10 +14,10 @@
 """ Vertex AI Gemini Multimodal Live WebSockets Proxy Server """
 import asyncio
 import json
-import websockets
 import ssl
-import certifi
 import traceback
+import websockets
+import certifi
 import google.auth
 from google.auth.transport.requests import Request
 from websockets.legacy.protocol import WebSocketCommonProtocol
