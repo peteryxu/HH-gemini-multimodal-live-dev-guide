@@ -55,7 +55,8 @@
     import { AudioRecorder } from 'http://localhost:8000/shared/audio-recorder.js';
     import { AudioStreamer } from 'http://localhost:8000/shared/audio-streamer.js';
     import { MediaHandler } from 'http://localhost:8000/shared/media-handler.js';
-    import { getWeather } from 'http://localhost:8000/shared/weather-api.js';
+    import { getWeather } from 'http://localhost:8000/shared/tools/weather-api.js';
+    import { getStockPrice } from 'http://localhost:8000/shared/tools/stock-api.js';
 
     const output = document.getElementById('output');
     const apiKey = '<YOUR_API_KEY>'; // Replace with your actual API key
@@ -111,6 +112,20 @@
                   }
                 },
                 required: ["city"]
+              }
+            },
+            {
+              name: "get_stock_price",
+              description: "Get current stock price and related information for a given stock symbol",
+              parameters: {
+                type: "OBJECT",
+                properties: {
+                  symbol: {
+                    type: "STRING",
+                    description: "The stock symbol to get price information for (e.g., AAPL, GOOGL)"
+                  }
+                },
+                required: ["symbol"]
               }
             }]
           },
@@ -257,7 +272,7 @@
         const functionCalls = toolCall.functionCalls;
         const functionResponses = [];
 
-        // Handle function calls (weather only)
+        // Handle function calls
         for (const call of functionCalls) {
           if (call.name === 'get_weather') {
             // Show the function call details
@@ -285,6 +300,36 @@
               response: {
                 result: {
                   object_value: weather
+                }
+              }
+            });
+          } else if (call.name === 'get_stock_price') {
+            // Show the function call details
+            logMessage(`Function: ${call.name}`);
+            logMessage(`Parameters: symbol = "${call.args.symbol}"`);
+            
+            const stockData = await getStockPrice(call.args.symbol);
+            console.log('Stock response:', stockData);
+
+            // Show the API response
+            if (stockData.error) {
+              logMessage(`API Response: ${stockData.error}`);
+            } else {
+              logMessage('API Response:');
+              logMessage(`Symbol: ${stockData.symbol}`);
+              logMessage(`Current Price: $${stockData.currentPrice}`);
+              logMessage(`Change: ${stockData.change > 0 ? '+' : ''}${stockData.change} (${stockData.percentChange}%)`);
+              logMessage(`Day Range: $${stockData.lowPrice} - $${stockData.highPrice}`);
+              logMessage(`Open: $${stockData.openPrice}`);
+              logMessage(`Previous Close: $${stockData.previousClose}`);
+            }
+
+            functionResponses.push({
+              id: call.id,
+              name: call.name,
+              response: {
+                result: {
+                  object_value: stockData
                 }
               }
             });

@@ -28,6 +28,9 @@
     <button id="micButton" onclick="toggleMicrophone()" disabled>
       <span class="material-symbols-outlined">play_arrow</span>
     </button>
+    <button id="muteButton" onclick="toggleMute()" class="action-button" disabled>
+      <span class="material-symbols-outlined">mic</span>
+    </button>
     <button id="webcamButton" onclick="toggleWebcam()" class="action-button">
       <span class="material-symbols-outlined">videocam</span>
     </button>
@@ -56,8 +59,8 @@
     import { AudioRecorder } from './shared/audio-recorder.js';
     import { AudioStreamer } from './shared/audio-streamer.js';
     import { MediaHandler } from './shared/media-handler.js';
-    import { getWeather } from './shared/weather-api.js';
-    import { getStockPrice } from './shared/stock-api.js';
+    import { getWeather } from './shared/tools/weather-api.js';
+    import { getStockPrice } from './shared/tools/stock-api.js';
     import { statusHandler } from './status-handler.js';
 
     console.log('Script started, setting up WebSocket...');
@@ -71,6 +74,7 @@
     let isRecording = false;
     let initialized = false;
     let isInterrupted = false;
+    let isMuted = false;
     let mediaHandler;
     let systemInstructions = '';  // Store system instructions for reconnection
     let geminiAPI;  // Will be initialized after loading system instructions
@@ -208,6 +212,7 @@
             geminiAPI.onSetupComplete = () => {
               resolve();
               document.getElementById('micButton').disabled = false;
+              document.getElementById('muteButton').disabled = false;
               // Only show screen share button on non-mobile devices
               if (!(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))) {
                 document.getElementById('screenButton').classList.remove('hidden');
@@ -240,7 +245,10 @@
         audioRecorder.stop();
         audioRecorder.off('data');
         isRecording = false;
+        isMuted = false;
         document.getElementById('micButton').innerHTML = '<span class="material-symbols-outlined">play_arrow</span>';
+        document.getElementById('muteButton').disabled = true;
+        document.getElementById('muteButton').innerHTML = '<span class="material-symbols-outlined">mic</span>';
         
         // Stop video streams when stopping recording
         mediaHandler.stopAll();
@@ -324,6 +332,21 @@
       await mediaHandler.switchCamera();
     };
 
+    window.toggleMute = function() {
+      if (!audioRecorder) return;
+      
+      isMuted = !isMuted;
+      const muteButton = document.getElementById('muteButton');
+      
+      if (isMuted) {
+        muteButton.innerHTML = '<span class="material-symbols-outlined">mic_off</span>';
+        audioRecorder.mute();
+      } else {
+        muteButton.innerHTML = '<span class="material-symbols-outlined">mic</span>';
+        audioRecorder.unmute();
+      }
+    };
+
     // Function to set up Gemini API event handlers
     function setupGeminiHandlers() {
       console.log('Setting up Gemini API handlers');
@@ -331,6 +354,7 @@
       geminiAPI.onSetupComplete = () => {
         console.log('Setup complete, enabling mic button');
         document.getElementById('micButton').disabled = false;
+        document.getElementById('muteButton').disabled = false;
         // Only show screen share button on non-mobile devices
         if (!(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent))) {
           document.getElementById('screenButton').classList.remove('hidden');

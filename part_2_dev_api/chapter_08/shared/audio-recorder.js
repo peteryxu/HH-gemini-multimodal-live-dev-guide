@@ -38,6 +38,7 @@ export class AudioRecorder extends EventEmitter3 {
     this.recording = false;
     this.recordingWorklet = undefined;
     this.starting = null;
+    this.isMuted = false;
   }
 
   async start() {
@@ -97,5 +98,19 @@ export class AudioRecorder extends EventEmitter3 {
       return;
     }
     handleStop();
+  }
+
+  mute() {
+    if (this.source && this.recordingWorklet && !this.isMuted) {
+      this.source.disconnect(this.recordingWorklet);
+      this.isMuted = true;
+    }
+  }
+
+  unmute() {
+    if (this.source && this.recordingWorklet && this.isMuted) {
+      this.source.connect(this.recordingWorklet);
+      this.isMuted = false;
+    }
   }
 }
