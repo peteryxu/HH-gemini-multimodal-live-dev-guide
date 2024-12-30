@@ -2,7 +2,7 @@
 
 This section mirrors the journey of Part 2, reimplementing each chapter to work with Vertex AI instead of the Development API. We progress towards Project Pastra, a production-ready multimodal AI assistant inspired by Google DeepMind's Project Astra. While the core concepts and features remain the same, we introduce a proxy-based architecture for authentication and communication with Vertex AI.
 
-## Journey to Project Vastra
+## Journey to Project Pastra
 Starting with real-time audio chat capabilities, each chapter adds new features, ultimately culminating in Project Pastra - our implementation of a universal AI assistant that can see, hear, and interact in real-time. Like Project Astra, it demonstrates how to create an AI assistant that can engage in natural, multimodal interactions while maintaining production-grade reliability, but built on Vertex AI's enterprise-grade infrastructure.
 
 ## Parallel Implementation
