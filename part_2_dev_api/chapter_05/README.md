@@ -40,7 +40,7 @@ This chapter's application consists of the following files:
 
 ## System Architecture
 
-![Audio Client Diagram](../assets/audio-to-audio-websocket.png)
+![Audio Client Diagram](../../assets/audio-to-audio-websocket.png)
 
 ## Detailed Explanation of Audio Processing
 
