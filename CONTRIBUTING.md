@@ -1,6 +1,6 @@
 # How to Contribute
 
-We'd love to accept your patches and contributions to this project.
+At this time, we're not looking to take contributions to this project.
 
 ## Before you begin
 
@@ -24,6 +24,9 @@ This project follows [Google's Open Source Community
 Guidelines](https://opensource.google/conduct/).
 
 ## Contribution process
+
+At this time, we're not looking to take contributions to this project.
+In the future, we look forward to your patches and contributions to this project.
 
 ### Code Reviews
 
